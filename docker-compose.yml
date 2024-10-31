@@ -1,0 +1,45 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:15.1
+    networks:
+      - postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - /usr/local/var/postgresql@16:/data/postgres
+    environment:
+      - POSTGRES_HOSTNAME=postgres
+    env_file:
+      - .env
+
+  pgadmin:
+    image: dpage/pgadmin4:6.18
+    networks:
+      - postgres
+    ports:
+      - "8090:80"
+    volumes:
+      - /Applications/pgAdmin\ 4.app:/root/.pgadmin
+    env_file:
+      - .env
+
+  movie-manager:
+    build:
+      context: .
+    command: npm run start:prod
+    volumes:
+      - ./src:/user/src/app/src
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+      - "9229:9229"
+    depends_on:
+      - postgres
+    networks:
+      - postgres
+
+networks:
+  postgres:
+    driver: bridge
